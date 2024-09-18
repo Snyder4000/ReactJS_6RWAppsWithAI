@@ -3,7 +3,9 @@ import ChatBotStart from './Components/ChatBotStart'
 
 const App = () => {
   return (
-    <div><ChatBotStart/></div>
+    <div className='container'>
+      <ChatBotStart/>
+    </div>
   )
 }
 
