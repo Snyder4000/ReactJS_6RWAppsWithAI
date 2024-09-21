@@ -1,16 +1,30 @@
 import React, { useEffect, useRef, useState } from 'react'
 import './ChatBotApp.css'
+import Picker from '@emoji-mart/react'
+import data from '@emoji-mart/data'
 
-const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNewChat }) => {
+const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNewChat, onNewChat1 }) => {
   const [inputValue, setInputValue] = useState('')
   const [messages, setMessages] = useState(chats[0]?.messages || [])
   const [isTyping, setIsTyping] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const chatEndRef = useRef(null)
+
+  useEffect(() =>{
+    if(activeChat){
+      const storedMessages = JSON.parse(localStorage.getItem(activeChat)) || []
+      setMessages(storedMessages)
+    }
+  }, [activeChat])
 
   useEffect(() =>{
     const activeChatObj = chats.find(chat => chat.id === activeChat)
     setMessages(activeChatObj ? activeChatObj.messages : [])
   }, [activeChat, chats])
+
+  const handleEmojiSelect = (emoji) => {
+    setInputValue((prevInput) => prevInput + emoji.native)
+  }
 
   const handleInputChange = (e) =>{
     setInputValue(e.target.value)  
@@ -31,6 +45,7 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
     }else{
       const updatedMessages = [...messages, newMessage]
       setMessages(updatedMessages)
+      localStorage.setItem(activeChat, JSON.stringify(updatedMessages))
       setInputValue('')
   
       const updatedChats = chats.map((chat) =>{
@@ -40,13 +55,14 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
           return chat
       })
       setChats(updatedChats)
+      localStorage.setItem("chats", JSON.stringify(updatedChats))
       setIsTyping(true)
 
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST", 
         headers:{
           "Content-Type": "application/json", 
-          // Authorization: `Bearer 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`
+          Authorization: `Bearer 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`
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
@@ -66,15 +82,17 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
 
       const updatedMessagesWithResponse = [...updatedMessages, newResponse]
       setMessages(updatedMessagesWithResponse)
+      localStorage.setItem(activeChat, JSON.stringify(updatedMessagesWithResponse))
       setIsTyping(false)
 
       const updatedChatsWithResponse = chats.map((chat) => {
         if(chat.id === activeChat){
-          return {...chat, messages: updatedChatsWithResponse}
+          return {...chat, messages: updatedMessagesWithResponse}
         }
         return chat
       })
       setChats(updatedChatsWithResponse)
+      localStorage.setItem("chats", JSON.stringify(updatedChatsWithResponse))
     }
   }
 
@@ -92,6 +110,8 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
   const handleDeleteChat = (id) =>{
     const updatedChats = chats.filter((chat) => chat.id !== id)
     setChats(updatedChats)
+    localStorage.setItem('chats', JSON.stringify(updatedChats))
+    localStorage.removeItem(id)
 
     if(id === activeChat){
         const newActiveChat = updatedChats.length > 0 ? updatedChats[0].id : null
@@ -108,7 +128,7 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
         <div className='chat-list'>
             <div className="chat-list-header">
                 <h2>Chat List</h2>
-                <i className='bx bx-edit-alt new-chat' onClick= {onNewChat}></i>
+                <i className='bx bx-edit-alt new-chat' onClick= {onNewChat1}></i>
             </div>
             {chats.map((chat)=>(
                 <div 
@@ -139,7 +159,15 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
                 <div ref={chatEndRef}></div>
             </div>
             <form className='msg-form' onSubmit={(e) => e.preventDefault()}>
-                <i className="fa-solid fa-face-smile emoji"></i>
+                <i 
+                  className="fa-solid fa-face-smile emoji" 
+                  onClick={() => setShowEmojiPicker((prev) => !prev)}
+                ></i>
+                {showEmojiPicker && (
+                  <div className='picker'>
+                    <Picker data={data} onEmojiSelect={handleEmojiSelect} />
+                  </div>
+                )}
                 <input 
                     type='text' 
                     className='msg-input' 
@@ -147,6 +175,7 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
                     value={inputValue} 
                     onChange={handleInputChange} 
                     onKeyDown={handleKeyDown}
+                    onFocus={() => setShowEmojiPicker(false)}
                 />
                 <i className="fa-solid fa-paper-plane" onClick={sendMessage}></i>
             </form>
