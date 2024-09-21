@@ -59,11 +59,11 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
       localStorage.setItem("chats", JSON.stringify(updatedChats))
       setIsTyping(true)
 
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      const response = await fetch("URL for AI goes here", {
         method: "POST", 
         headers:{
           "Content-Type": "application/json", 
-          Authorization: `Bearer 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`
+          Authorization: `Bearer API Key goes here`
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
