@@ -70,7 +70,7 @@
     letter-spacing: 0.1rem;
 }
 
-.search-bar input:focus:placeholder{
+.search-bar input:focus::placeholder{
     color: transparent;
 }
 

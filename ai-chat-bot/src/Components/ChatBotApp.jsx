@@ -32,7 +32,7 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
   }
 
   const sendMessage = async () =>{
-    if (inputValue.trim === '') return
+    if (inputValue.trim() === '') return
 
     const newMessage= {
         type: 'prompt',
@@ -59,11 +59,11 @@ const ChatBotApp = ({ onGoBack, chats, setChats, activeChat, setActiveChat, onNe
       localStorage.setItem("chats", JSON.stringify(updatedChats))
       setIsTyping(true)
 
-      const response = await fetch("URL for AI goes here", {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST", 
         headers:{
           "Content-Type": "application/json", 
-          Authorization: `Bearer API Key goes here`
+          Authorization: `Bearer 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`
           },
           body: JSON.stringify({
             model: "gpt-3.5-turbo",
