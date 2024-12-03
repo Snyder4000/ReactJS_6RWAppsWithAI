@@ -4,7 +4,7 @@ import './Components/CalendarApp.css'
 
 const App = () => {
   return (
-    <div><CalendarApp/></div>
+    <div className='container'><CalendarApp/></div>
   )
 }
 
